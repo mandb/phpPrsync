@@ -45,6 +45,37 @@ echo "\nFileLists are Done";
 
 foreach ($tList as $tfid=>$transfer){
 	$rsyncCommand = 'rsync --files-from=' . $transfer['fn'];
+	/*
+	you can dynamically control the rate limit on rsync so that the remaining processes can have more bandwidth after one is finished, like this:
+	https://bugzilla.samba.org/show_bug.cgi?id=7120
+	
+			with pipe-viewer or similar pipe transfer visualization tools with throttling feature. 
+
+			http://www.ivarch.com/programs/pv.shtml 
+
+			first we need to create a little wrapper to put pv into the transfer chain:
+
+			linux:/tmp # cat /tmp/pv-wrapper
+			#!/bin/bash
+			pv -L 1000 | "$@"
+
+			example:
+
+			linux:/tmp # rsync --rsh='/tmp/pv-wrapper ssh' -a /proc root@localhost:/tmp/test
+			Password: 4 B 0:00:01 [3.68 B/s] [ <=> ]
+			file has vanished: "/proc/10/exe"
+			file has vanished: "/proc/10/task/10/exe"
+			file has vanished: "/proc/11/exe"
+			file has vanished: "/proc/11/task/11/exe"
+			file has vanished: "/proc/12/exe"=> ]
+			4.88kiB 0:00:05 [1002 B/s] [ <=> 
+
+			You can even adjust the transfer rate at runtime, as pv can communicate with a running instance of itself - you will just need the appropriate PID. This would even make cron based tuning of transfer rates possible.
+
+			pv -R $PIDOFPV -L RATE
+
+			*/
+				
 	$catCommand = 'cat ' . $transfer['fn'];
 	$tList[$tfid]['ph'] = popen($catCommand, 'r'); // open the rsync process and store the process handle in the array
 }
