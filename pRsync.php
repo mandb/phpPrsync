@@ -74,7 +74,9 @@ foreach ($tList as $tfid=>$transfer){
 
 			pv -R $PIDOFPV -L RATE
 
-			*/
+	One could also adjust the rate limit per process proportionately based on the size of the files to be trasnferred in each process by the sizeBin array.
+
+	*/
 				
 	$catCommand = 'cat ' . $transfer['fn'];
 	$tList[$tfid]['ph'] = popen($catCommand, 'r'); // open the rsync process and store the process handle in the array
